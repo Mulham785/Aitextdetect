@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Anti-AI - Detect if text was written by a human or AI." />
+    <title>Anti-AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+
+<header>
+    <h1 class="logo-text">ANTI-AI</h1>
+</header>
+
+<main>
+    <section class="input-section">
+        <form action="/analyze" method="post">
+            <label for="input_text">Enter your text:</label>
+            <textarea id="input_text" name="input_text" rows="10" placeholder="Paste or type your content here..."></textarea>
+            <button type="submit">Detect AI</button>
+        </form>
+    </section>
+
+    {% if ai_score is not none %}
+    <section class="result-section">
+        <div class="result">
+            <strong>AI-Likeness Score:</strong> {{ ai_score }}%
+            <div class="progress-bar">
+                <div class="progress-fill" style="width: {{ ai_score }}%;"></div>
+            </div>
+            <p class="confidence-text">
+                {% if ai_score >= 70 %}
+                    This text is <strong>very likely</strong> AI-generated.
+                {% elif ai_score >= 40 %}
+                    This text is <strong>possibly</strong> AI-generated.
+                {% else %}
+                    This text is <strong>likely</strong> human-written.
+                {% endif %}
+            </p>
+        </div>
+    </section>
+    {% endif %}
+</main>
+
+<footer>
+    <p>&copy; {{ current_year }} Anti-AI by Mulham Husein.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Text Detector</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .container { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+        textarea { width: 100%; height: 150px; margin-bottom: 15px; }
+        input[type="file"] { margin-bottom: 15px; }
+        button { background: #4CAF50; color: white; padding: 10px 20px; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 15px; background: #e8f5e9; border-radius: 5px; }
+        .error { color: red; margin-top: 10px; }
+        .ai { color: #d32f2f; }
+        .human { color: #388e3c; }
+        .tabs { display: flex; margin-bottom: 15px; }
+        .tab { padding: 10px 15px; cursor: pointer; background: #e0e0e0; border-radius: 5px 5px 0 0; }
+        .tab.active { background: #f9f9f9; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .stats { margin-top: 15px; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        .stats h3 { margin-top: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    </style>
+    <script>
+        function openTab(evt, tabName) {
+            var i, tabcontent, tabs;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tabs = document.getElementsByClassName("tab");
+            for (i = 0; i < tabs.length; i++) {
+                tabs[i].className = tabs[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Text Detector</h1>
+        <p>Enter text or upload a text file to check if it's AI-generated</p>
+
+        <div class="tabs">
+            <div class="tab active" onclick="openTab(event, 'text-tab')">Text Input</div>
+            <div class="tab" onclick="openTab(event, 'file-tab')">File Upload</div>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div id="text-tab" class="tab-content active">
+                <label for="text_input">Enter text to analyze:</label>
+                <textarea name="text_input" placeholder="Paste your text here..."></textarea>
+            </div>
+
+            <div id="file-tab" class="tab-content">
+                <label for="file_upload">Upload a text file:</label>
+                <input type="file" name="file_upload" accept=".txt">
+            </div>
+
+            <button type="submit">Analyze Text</button>
+        </form>
+
+        {% if error %}
+            <div class="error">{{ error }}</div>
+        {% endif %}
+
+        {% if result %}
+            <div class="result">
+                <h2>Analysis Result:</h2>
+                {% if 'error' in result %}
+                    <div class="error">Error: {{ result.error }}</div>
+                {% else %}
+                    <p><strong>Verdict:</strong>
+                        <span class="{% if result.ai_generated %}ai{% else %}human{% endif %}">
+                            {{ "AI-Generated" if result.ai_generated else "Human-Written" }}
+                        </span>
+                    </p>
+                    <p><strong>Confidence:</strong> {{ result.confidence }}</p>
+                    <p><strong>Detection Score:</strong> {{ result.score }}</p>
+                    <p><strong>Model Label:</strong> {{ result.label }}</p>
+                    <p><strong>Original Text Sample:</strong> {{ original_text }}</p>
+
+                    {% if result.statistics %}
+                    <div class="stats">
+                        <h3>Text Statistics</h3>
+                        <div class="stats-grid">
+                            <div><strong>Word Count:</strong> {{ result.statistics.word_count }}</div>
+                            <div><strong>Unique Words:</strong> {{ result.statistics.unique_words }}</div>
+                            <div><strong>Avg. Word Length:</strong> {{ "%.2f"|format(result.statistics.avg_word_length) }}</div>
+                            <div><strong>Sentence Count:</strong> {{ result.statistics.sentence_count }}</div>
+                            <div><strong>Lexical Diversity:</strong> {{ "%.2f"|format(result.statistics.lexical_diversity) }}</div>
+                            <div><strong>Avg. Sentence Length:</strong> {{ "%.2f"|format(result.statistics.avg_sentence_length) }}</div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

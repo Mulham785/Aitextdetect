@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Text Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 2rem;
+        }
+        .container {
+            max-width: 1000px;
+        }
+        .result-card {
+            margin-top: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .ai-result {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        .ai-label {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+        .ai {
+            background-color: #ffcccc;
+            color: #cc0000;
+        }
+        .human {
+            background-color: #ccffcc;
+            color: #006600;
+        }
+        .feature-table {
+            margin-top: 1rem;
+        }
+        .text-sample {
+            background-color: #f0f0f0;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            white-space: pre-wrap;
+        }
+        .progress {
+            height: 25px;
+            margin-top: 0.5rem;
+        }
+        .undefined {
+            color: #999;
+            font-style: italic;
+        }
+        .content-category {
+            background-color: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+        .tech-term {
+            background-color: #e9ecef;
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: monospace;
+            margin-right: 0.3rem;
+            margin-bottom: 0.3rem;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Advanced Text Analysis</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="textInput" class="form-label">Enter text to analyze:</label>
+                        <textarea class="form-control" id="textInput" name="text_input" rows="5">{{ original_text if original_text }}</textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="fileUpload" class="form-label">Or upload a text file:</label>
+                        <input class="form-control" type="file" id="fileUpload" name="file_upload" accept=".txt,.zip">
+                        <div class="form-text">Supports .txt files or .zip archives containing multiple .txt files</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Analyze Text</button>
+                </form>
+            </div>
+        </div>
+
+        {% if error %}
+        <div class="alert alert-danger mt-3" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        {% if result %}
+        <div class="card result-card">
+            <div class="card-body">
+                <h2 class="card-title">Analysis Results</h2>
+
+                <div class="d-flex align-items-center mb-3">
+                    <span class="ai-result me-3">AI Detection:</span>
+                    <span class="ai-label {% if result.ai_generated %}ai{% else %}human{% endif %}">
+                        {{ result.label }} ({{ result.confidence }} confidence)
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between">
+                        <span>AI Probability:</span>
+                        <span>{{ result.confidence }}</span>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar {% if result.ai_generated %}bg-danger{% else %}bg-success{% endif %}"
+                             role="progressbar"
+                             style="width: {{ result.confidence_value }}%"
+                             aria-valuenow="{{ result.confidence_value }}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                </div>
+
+                {% if original_text %}
+                <h5 class="mt-4">Text Sample:</h5>
+                <div class="text-sample">
+                    {{ original_text }}
+                </div>
+                {% endif %}
+
+                <h5 class="mt-4">Content Analysis:</h5>
+                <div class="mb-4">
+                    <h6>Primary Content Categories:</h6>
+                    {% if result.categories %}
+                        {% for category in result.categories %}
+                        <span class="content-category">{{ category }}</span>
+                        {% endfor %}
+                    {% else %}
+                        <span class="text-muted">No specific categories identified</span>
+                    {% endif %}
+
+                    <h6 class="mt-3">Technical Terms Identified:</h6>
+                    <div class="d-flex flex-wrap">
+                        {% if result.features and result.features.technical_terms %}
+                            {% for term in result.features.technical_terms %}
+                            <span class="tech-term">{{ term }}</span>
+                            {% endfor %}
+                        {% else %}
+                            <span class="text-muted">No significant technical terms found</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Text Statistics:</h5>
+                <div class="table-responsive">
+                    <table class="table table-bordered feature-table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Feature</th>
+                                <th>Value</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Word Count</td>
+                                <td>{{ result.features.word_count if result.features and 'word_count' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Total number of words in the text</td>
+                            </tr>
+                            <tr>
+                                <td>Unique Words</td>
+                                <td>{{ result.features.unique_words if result.features and 'unique_words' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Number of distinct words</td>
+                            </tr>
+                            <tr>
+                                <td>Lexical Diversity</td>
+                                <td>{{ "%.3f"|format(result.features.lexical_diversity) if result.features and 'lexical_diversity' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Ratio of unique words to total words</td>
+                            </tr>
+                            <tr>
+                                <td>Avg Word Length</td>
+                                <td>{{ "%.2f"|format(result.features.avg_word_length) if result.features and 'avg_word_length' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Average number of characters per word</td>
+                            </tr>
+                            <tr>
+                                <td>Sentence Length Variation</td>
+                                <td>{{ "%.2f"|format(result.features.sentence_length_variance) if result.features and 'sentence_length_variance' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Variance in words per sentence</td>
+                            </tr>
+                            <tr>
+                                <td>Readability Score</td>
+                                <td>{{ "%.1f"|format(result.features.flesch_kincaid) if result.features and 'flesch_kincaid' in result.features else '<span class="undefined">N/A</span>'|safe }}</td>
+                                <td>Estimated reading difficulty (higher = easier)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if result.score %}
+                <div class="mt-3">
+                    <small class="text-muted">
+                        <strong>Detection Score:</strong> {{ result.score }} (higher means more likely AI-generated)
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
