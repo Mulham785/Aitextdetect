@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Home - AI Text Analysis{% endblock %}
+
+{% block content %}
+    <div class="hero">
+        <h2>Analyze Text for AI-Generated Content</h2>
+        <p>Upload a PDF file or enter text directly to analyze for AI-generated content.</p>
+    </div>
+    
+    <div class="analysis-form">
+        <form method="POST" action="{{ url_for('analyze') }}" enctype="multipart/form-data">
+            <div class="tabs">
+                <div class="tab active" data-tab="upload">Upload PDF</div>
+                <div class="tab" data-tab="text">Enter Text</div>
+            </div>
+            
+            <div class="tab-content active" id="upload-tab">
+                <div class="form-group">
+                    <label for="file">Select PDF File:</label>
+                    <input type="file" id="file" name="file" accept=".pdf">
+                </div>
+            </div>
+            
+            <div class="tab-content" id="text-tab">
+                <div class="form-group">
+                    <label for="text">Enter Text:</label>
+                    <textarea id="text" name="text" rows="10" placeholder="Enter your text here..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" class="button">Analyze Text</button>
+        </form>
+    </div>
+    
+    <div class="info">
+        <h3>How It Works</h3>
+        <p>This tool analyzes text using statistical metrics like perplexity and burstiness to determine the proportion of AI-generated content.</p>
+        <ul>
+            <li><strong>Perplexity</strong>: Measures text predictability. Lower values indicate more predictable text, common in AI-generated content.</li>
+            <li><strong>Burstiness</strong>: Measures variation in sentence structure. Lower values indicate more uniform structure, common in AI-generated content.</li>
+            <li><strong>AI Proportion</strong>: Estimated percentage of AI-generated content in the text.</li>
+        </ul>
+    </div>
+{% endblock %}

@@ -1,0 +1,6 @@
+Flask==2.3.3
+Flask-SQLAlchemy==3.0.5
+nltk==3.8.1
+numpy==1.24.3
+PyPDF2==3.0.1
+Werkzeug==2.3.7

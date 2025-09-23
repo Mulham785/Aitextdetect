@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis Results - AI Text Analysis{% endblock %}
+
+{% block content %}
+    <h2>Analysis Results</h2>
+    
+    <div class="text-preview">
+        <h3>Text Information</h3>
+        <p><strong>Source:</strong> {{ text.source }}</p>
+        <p><strong>Topic:</strong> {{ text.topic }}</p>
+        <div class="content-preview">
+            <p>{{ text.content[:300] }}{% if text.content|length > 300 %}...{% endif %}</p>
+        </div>
+    </div>
+    
+    {% if analysis %}
+    <div class="results">
+        <h3>Statistical Analysis</h3>
+        <div class="metric">
+            <h4>Perplexity</h4>
+            <p class="value">{{ "%.2f"|format(analysis.perplexity) }}</p>
+            <p>Measures the predictability of the text. Lower values indicate more predictable text, which is common in AI-generated content.</p>
+        </div>
+        
+        <div class="metric">
+            <h4>Burstiness</h4>
+            <p class="value">{{ "%.2f"|format(analysis.burstiness) }}</p>
+            <p>Measures the variation in sentence structure. Lower values indicate more uniform structure, which is common in AI-generated content.</p>
+        </div>
+        
+        <div class="metric">
+            <h4>AI Content Proportion</h4>
+            <div class="progress-bar">
+                <div class="progress" style="width: {{ analysis.ai_proportion * 100 }}%"></div>
+            </div>
+            <p class="value">{{ "%.1f"|format(analysis.ai_proportion * 100) }}%</p>
+            <p>Estimated proportion of AI-generated content in the text.</p>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="actions">
+        <a href="{{ url_for('index') }}" class="button">Analyze Another Text</a>
+    </div>
+{% endblock %}
