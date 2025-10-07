@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}AI Documents - AI Text Analysis{% endblock %}
+
+{% block page_title %}AI Documents{% endblock %}
+
+{% block content %}
+    <!-- Filters -->
+    <div class="card">
+        <div class="card-body">
+            <form method="GET" class="filter-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="topic">Topic</label>
+                        <select name="topic" id="topic" class="form-control">
+                            <option value="">All Topics</option>
+                            {% for topic in topics %}
+                            <option value="{{ topic.name }}"> {% if request.args.get('topic') == topic.name %}selected{% endif %}>{{ topic.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="source">Source</label>
+                        <select name="source" id="source" class="form-control">
+                            <option value="">All Sources</option>
+                            <option value="pdf"> {% if request.args.get('source') == 'pdf' %}selected{% endif %}>PDF</option>
+                            <option value="manual"> {% if request.args.get('source') == 'manual' %}selected{% endif %}>Manual</option>
+                            <option value="generated"> {% if request.args.get('source') == 'generated' %}selected{% endif %}>Generated</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn">Apply Filters</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Documents Grid -->
+    <div class="documents-grid">
+        {% for text in documents %}
+        <div class="document-card">
+            <div class="document-header">
+                <h3>{{ text.topic }}</h3>
+                <span class="badge badge-{{ text.source }}">{{ text.source }}</span>
+            </div>
+            <div class="document-body">
+                <p class="document-preview">{{ text.content[:200] }}{% if text.content|length > 200 %}...{% endif %}</p>
+                
+                {% if text.analysis %}
+                <div class="document-stats">
+                    <div class="stat">
+                        <span class="stat-label">AI Proportion</span>
+                        <div class="progress-sm">
+                            <div class="progress-bar" style="width: {{ text.analysis.ai_proportion * 100 }}%"></div>
+                        </div>
+                        <span class="stat-value">{{ "%.1f"|format(text.analysis.ai_proportion * 100) }}%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Perplexity</span>
+                        <span class="stat-value">{{ "%.2f"|format(text.analysis.perplexity) }}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Burstiness</span>
+                        <span class="stat-value">{{ "%.2f"|format(text.analysis.burstiness) }}</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="document-footer">
+                <span class="document-date">{{ text.file_path or 'No file' }}</span>
+                <div class="document-actions">
+                    <a href="{{ url_for('view_document', doc_id=text.id) }}" class="btn btn-sm">View</a>
+                    <a href="{{ url_for('analyze_document', doc_id=text.id) }}" class="btn btn-sm btn-primary">Analyze</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not documents %}
+    <div class="card">
+        <div class="card-body text-center">
+            <i class="fas fa-inbox fa-3x text-muted"></i>
+            <h3>No AI Documents Found</h3>
+            <p>Upload or generate AI documents to get started.</p>
+            <a href="{{ url_for('upload_ai') }}" class="btn">Upload AI Document</a>
+            <a href="{{ url_for('generate_ai') }}" class="btn btn-primary">Generate AI Document</a>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}

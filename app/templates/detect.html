@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}AI Text Analysis{% endblock %}
+
+{% block content %}
+    <h2>Detect AI-Generated Content</h2>
+    
+    <div class="analysis-form">
+        <form method="POST" action="{{ url_for('detect') }}" enctype="multipart/form-data">
+            <div class="tabs">
+                <div class="tab active" data-tab="upload">Upload PDF</div>
+                <div class="tab" data-tab="text">Enter Text</div>
+            </div>
+            
+            <div class="tab-content active" id="upload-tab">
+                <div class="form-group">
+                    <label for="file">Select PDF File:</label>
+                    <input type="file" id="file" name="file" accept=".pdf">
+                </div>
+            </div>
+            
+            <div class="tab-content" id="text-tab">
+                <div class="form-group">
+                    <label for="text">Enter Text to Analyze:</label>
+                    <textarea id="text" name="text" rows="10" placeholder="Enter text to analyze here..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" class="button">Analyze Text</button>
+        </form>
+    </div>
+    
+    <div class="info">
+        <h3>About AI Content Detection</h3>
+        <p>Analyze text to detect AI-generated content using comprehensive comparison metrics. The analysis includes perplexity, burstiness, and similarity comparisons with both AI and human documents in the database.</p>
+    </div>
+{% endblock %}

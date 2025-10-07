@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Generate AI Document - AI Text Analysis{% endblock %}
+
+{% block content %}
+    <h2>Generate AI Document</h2>
+    
+    <div class="analysis-form">
+        <form method="POST" action="{{ url_for('generate_ai') }}">
+            <div class="form-group">
+                <label for="topic">Select ACM Topic:</label>
+                <select id="topic" name="topic" required>
+                    <option value="">-- Select a topic --</option>
+                    {% for topic in topics %}
+                    <option value="{{ topic.name }}">{{ topic.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="button">Generate AI Document</button>
+        </form>
+    </div>
+    
+    <div class="info">
+        <h3>About AI Document Generation</h3>
+        <p>Generate AI documents on various ACM topics to expand your reference database. These generated documents will be used for comparison when analyzing new texts.</p>
+    </div>
+{% endblock %}

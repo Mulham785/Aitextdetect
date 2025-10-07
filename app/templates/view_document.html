@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}View Document - AI Text Analysis{% endblock %}
+
+{% block page_title %}Document Details{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ text.topic }}</h2>
+            <div class="card-actions">
+                <span class="badge badge-{{ text.source }}">{{ text.source }}</span>
+                {% if text.is_ai %}
+                <span class="badge badge-ai">AI Document</span>
+                {% else %}
+                <span class="badge badge-human">Human Document</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="document-meta">
+                <div class="meta-item">
+                    <span class="meta-label">Created:</span>
+                    <span class="meta-value">{{ text.created_at.strftime('%Y-%m-%d %H:%M') if text.created_at else 'Unknown' }}</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">File:</span>
+                    <span class="meta-value">{{ text.file_path or 'No file uploaded' }}</span>
+                </div>
+                {% if text.acm_topic %}
+                <div class="meta-item">
+                    <span class="meta-label">ACM Topic:</span>
+                    <span class="meta-value">{{ text.acm_topic }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="document-content">
+                <h3>Content</h3>
+                <div class="content-box">
+                    {{ text.content }}
+                </div>
+            </div>
+            
+            {% if analysis %}
+            <div class="analysis-section">
+                <h3>Analysis Results</h3>
+                <div class="analysis-grid">
+                    <div class="analysis-item">
+                        <h4>Perplexity</h4>
+                        <div class="analysis-value">{{ "%.2f"|format(analysis.perplexity) }}</div>
+                        <p class="analysis-desc">Measures text predictability. Lower values indicate more predictable text.</p>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <h4>Burstiness</h4>
+                        <div class="analysis-value">{{ "%.2f"|format(analysis.burstiness) }}</div>
+                        <p class="analysis-desc">Measures variation in sentence structure. Lower values indicate more uniform structure.</p>
+                    </div>
+                    
+                    <div class="analysis-item">
+                        <h4>AI Content Proportion</h4>
+                        <div class="progress-lg">
+                            <div class="progress-bar" style="width: {{ analysis.ai_proportion * 100 }}%"></div>
+                        </div>
+                        <div class="analysis-value">{{ "%.1f"|format(analysis.ai_proportion * 100) }}%</div>
+                        <p class="analysis-desc">Estimated proportion of AI-generated content.</p>
+                    </div>
+                    
+                    {% if analysis.ai_similarity is not none %}
+                    <div class="analysis-item">
+                        <h4>AI Document Similarity</h4>
+                        <div class="progress-lg">
+                            <div class="progress-bar" style="width: {{ analysis.ai_similarity * 100 }}%"></div>
+                        </div>
+                        <div class="analysis-value">{{ "%.1f"|format(analysis.ai_similarity * 100) }}%</div>
+                        <p class="analysis-desc">Similarity with AI documents in the database.</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if analysis.human_similarity is not none %}
+                    <div class="analysis-item">
+                        <h4>Human Document Similarity</h4>
+                        <div class="progress-lg">
+                            <div class="progress-bar" style="width: {{ analysis.human_similarity * 100 }}%"></div>
+                        </div>
+                        <div class="analysis-value">{{ "%.1f"|format(analysis.human_similarity * 100) }}%</div>
+                        <p class="analysis-desc">Similarity with human documents in the database.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center">
+                <p>No analysis available for this document.</p>
+                <a href="{{ url_for('analyze_document', doc_id=text.id) }}" class="btn btn-primary">Analyze Document</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}All Analyses - AI Text Analysis{% endblock %}
+
+{% block page_title %}All Analyses{% endblock %}
+
+{% block content %}
+    <!-- Filters -->
+    <div class="card">
+        <div class="card-body">
+            <form method="GET" class="filter-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="document_type">Document Type</label>
+                        <select name="document_type" id="document_type" class="form-control">
+                            <option value="">All Types</option>
+                            <option value="ai"> {% if request.args.get('document_type') == 'ai' %}selected{% endif %}>AI Documents</option>
+                            <option value="human" >{% if request.args.get('document_type') == 'human' %}selected{% endif %}>Human Documents</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="min_ai_score">Min AI Score</label>
+                        <input type="number" name="min_ai_score" id="min_ai_score" class="form-control" min="0" max="1" step="0.1" value="{{ request.args.get('min_ai_score', '') }}" placeholder="0.0">
+                    </div>
+                    <div class="form-group">
+                        <label for="max_ai_score">Max AI Score</label>
+                        <input type="number" name="max_ai_score" id="max_ai_score" class="form-control" min="0" max="1" step="0.1" value="{{ request.args.get('max_ai_score', '') }}" placeholder="1.0">
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn">Apply Filters</button>
+                    </div>
+                </div>  <!-- Added missing closing tag -->
+            </form>
+        </div>
+    </div>
+
+    <!-- Analyses Table -->
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Document</th>
+                            <th>Type</th>
+                            <th>Source</th>
+                            <th>AI Proportion</th>
+                            <th>AI Similarity</th>
+                            <th>Human Similarity</th>
+                            <th>Perplexity</th>
+                            <th>Burstiness</th>
+                            <th>Analyzed At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for analysis, text in analyses %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('view_document', doc_id=text.id) }}">{{ text.topic }}</a>
+                            </td>
+                            <td>
+                                {% if text.is_ai %}
+                                <span class="badge badge-ai">AI</span>
+                                {% else %}
+                                <span class="badge badge-human">Human</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="badge badge-{{ text.source }}">{{ text.source }}</span></td>
+                            <td>
+                                <div class="progress-sm">
+                                    <div class="progress-bar" style="width: {{ analysis.ai_proportion * 100 }}%"></div>
+                                </div>
+                                <span>{{ "%.1f"|format(analysis.ai_proportion * 100) }}%</span>
+                            </td>
+                            <td>
+                                <div class="progress-sm">
+                                    <div class="progress-bar" style="width: {{ analysis.ai_similarity * 100 }}%"></div>
+                                </div>
+                                <span>{{ "%.1f"|format(analysis.ai_similarity * 100) }}%</span>
+                            </td>
+                            <td>
+                                <div class="progress-sm">
+                                    <div class="progress-bar" style="width: {{ analysis.human_similarity * 100 }}%"></div>
+                                </div>
+                                <span>{{ "%.1f"|format(analysis.human_similarity * 100) }}%</span>
+                            </td>
+                            <td>{{ "%.2f"|format(analysis.perplexity) }}</td>
+                            <td>{{ "%.2f"|format(analysis.burstiness) }}</td>
+                            <td>{{ analysis.analyzed_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('view_document', doc_id=text.id) }}" class="btn btn-sm">View</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if not analyses %}
+            <div class="text-center">
+                <i class="fas fa-chart-line fa-3x text-muted"></i>
+                <h3>No Analyses Found</h3>
+                <p>Perform some text analyses to see results here.</p>
+                <a href="{{ url_for('detect') }}" class="btn btn-primary">Analyze Text</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

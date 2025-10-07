@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Human Document - AI Text Analysis{% endblock %}
+
+{% block content %}
+    <h2>Upload Human-Written Document</h2>
+    
+    <div class="analysis-form">
+        <form method="POST" action="{{ url_for('upload_human') }}" enctype="multipart/form-data">
+            <div class="tabs">
+                <div class="tab active" data-tab="upload">Upload PDF</div>
+                <div class="tab" data-tab="text">Enter Text</div>
+            </div>
+            
+            <div class="tab-content active" id="upload-tab">
+                <div class="form-group">
+                    <label for="file">Select PDF File:</label>
+                    <input type="file" id="file" name="file" accept=".pdf">
+                </div>
+            </div>
+            
+            <div class="tab-content" id="text-tab">
+                <div class="form-group">
+                    <label for="text">Enter Human-Written Text:</label>
+                    <textarea id="text" name="text" rows="10" placeholder="Enter human-written text here..."></textarea>
+                </div>
+            </div>
+            
+            <button type="submit" class="button">Upload Human Document</button>
+        </form>
+    </div>
+    
+    <div class="info">
+        <h3>About Human Document Upload</h3>
+        <p>Upload human-written documents to build a reference database. These documents will be used for comparison when analyzing new texts to detect AI-generated content.</p>
+    </div>
+{% endblock %}

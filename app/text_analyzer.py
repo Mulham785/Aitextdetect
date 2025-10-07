@@ -2,17 +2,25 @@ import numpy as np
 from nltk.tokenize import word_tokenize, sent_tokenize
 from collections import Counter
 import math
+import re
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 import nltk
 
 nltk.download('punkt')
-#   percent to know if text unique or not
-def calculate_perplexity(Text,n = 2 ):
-    tokens = word_tokenize(Text.lower())
+
+
+def calculate_perplexity(text, n=2):
+    """Calculate perplexity using n-gram model"""
+    tokens = word_tokenize(text.lower())
     ngrams = list(zip(*[tokens[i:] for i in range(n)]))
     ngram_counts = Counter(ngrams)
     total_ngrams = len(ngrams)
+
     if total_ngrams == 0:
         return float('inf')
+
+    # Calculate log probability
     log_prob = 0
     for ngram in ngrams:
         count = ngram_counts[ngram]
@@ -46,7 +54,6 @@ def analyze_text(text):
     burstiness = calculate_burstiness(text)
 
     # Calculate AI proportion based on metrics
-    # This is a simplified heuristic
     normalized_perplexity = min(perplexity / 100, 1.0)  # Normalize to 0-1
     normalized_burstiness = min(burstiness / 2, 1.0)  # Normalize to 0-1
 
@@ -57,5 +64,58 @@ def analyze_text(text):
     return perplexity, burstiness, ai_proportion
 
 
+def compare_with_documents(text, documents):
+    """Compare text with a list of documents using TF-IDF and cosine similarity"""
+    if not documents:
+        return 0.0
+
+    # Create a list with the input text and all comparison documents
+    all_texts = [text] + [doc.content for doc in documents]
+
+    # Create TF-IDF vectors
+    vectorizer = TfidfVectorizer().fit_transform(all_texts)
+
+    # Calculate cosine similarity between input text and each document
+    vectors = vectorizer.toarray()
+    text_vector = vectors[0:1]
+    doc_vectors = vectors[1:]
+
+    similarities = cosine_similarity(text_vector, doc_vectors)[0]
+
+    # Return average similarity
+    return np.mean(similarities)
 
 
+def comprehensive_text_analysis(text):
+    """Comprehensive analysis comparing with stored AI and human documents"""
+    from app.models import Text
+
+    # Basic metrics
+    perplexity, burstiness, ai_proportion = analyze_text(text)
+
+    # Get AI and human documents from database
+    ai_docs = Text.query.filter_by(is_ai=True).all()
+    human_docs = Text.query.filter_by(is_ai=False).all()
+
+    # Calculate similarities
+    ai_similarity = compare_with_documents(text, ai_docs)
+    human_similarity = compare_with_documents(text, human_docs)
+
+    # Calculate overall AI score based on all metrics
+    # Weighted combination of all indicators
+    overall_ai_score = (
+            0.3 * ai_proportion +
+            0.3 * ai_similarity +
+            0.2 * (1 - human_similarity) +
+            0.1 * (1 - perplexity) +
+            0.1 * (1 - burstiness)
+    )
+
+    return {
+        'perplexity': perplexity,
+        'burstiness': burstiness,
+        'ai_proportion': ai_proportion,
+        'ai_similarity': ai_similarity,
+        'human_similarity': human_similarity,
+        'overall_ai_score': overall_ai_score
+    }

@@ -4,36 +4,84 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}AI Text Analysis{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>AI-Generated Text Analysis</h1>
-            <p>Generation and Statistical Analysis of AI-Generated Text Corpora</p>
-        </header>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+              <div class="university-logo">
+    <img src="{{ url_for('static', filename='images/rostock_logo.svg') }}" alt="University of Rostock" class="logo-svg">
+</div>
 
-        <nav>
-            <a href="{{ url_for('index') }}">Home</a>
+            </div>
+
+            <ul class="nav-menu">
+                <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a></li>
+                <li><a href="{{ url_for('upload_ai') }}" class="{% if request.endpoint == 'upload_ai' %}active{% endif %}">
+                    <i class="fas fa-upload"></i> Upload AI Docs
+                </a></li>
+                <li><a href="{{ url_for('upload_human') }}" class="{% if request.endpoint == 'upload_human' %}active{% endif %}">
+                    <i class="fas fa-file-upload"></i> Upload Human Docs
+                </a></li>
+                <li><a href="{{ url_for('generate_ai') }}" class="{% if request.endpoint == 'generate_ai' %}active{% endif %}">
+                    <i class="fas fa-magic"></i> Generate AI Docs
+                </a></li>
+                <li><a href="{{ url_for('detect') }}" class="{% if request.endpoint == 'detect' %}active{% endif %}">
+                    <i class="fas fa-search"></i> Detect AI Content
+                </a></li>
+                <li><a href="{{ url_for('view_ai_docs') }}" class="{% if request.endpoint == 'view_ai_docs' %}active{% endif %}">
+                    <i class="fas fa-robot"></i> AI Documents
+                </a></li>
+                <li><a href="{{ url_for('view_human_docs') }}" class="{% if request.endpoint == 'view_human_docs' %}active{% endif %}">
+                    <i class="fas fa-user"></i> Human Documents
+                </a></li>
+            </ul>
         </nav>
 
-        <main>
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="flash-messages">
-                        {% for message in messages %}
-                            <div class="flash-message">{{ message }}</div>
-                        {% endfor %}
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="main-header">
+                <div class="header-content">
+                    <div class="project-info">
+                        <h1>{% block page_title %}   AI Text Analysis
+                {% endblock %}</h1>
+                        <div class="project-details">
+                            <div class="project-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Professor: Dr.-Ing. Hannes Grunert, M.Sc.</span>
+                            </div>
+                            <div class="project-item">
+                                <i class="fas fa-user-graduate"></i>
+                                <span>Student: Mulham Husein</span>
+                            </div>
+                            <div class="project-item">
+                                <i class="fas fa-university"></i>
+                                <span>University of Rostock</span>
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </header>
+
+            <main class="content">
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i> {{ error }}
+                </div>
                 {% endif %}
-            {% endwith %}
 
-            {% block content %}{% endblock %}
-        </main>
+                {% block content %}{% endblock %}
+            </main>
 
-        <footer>
-            <p>Bachelor Thesis by Mulham Husein | University of Rostock</p>
-        </footer>
+            <footer class="main-footer">
+                <p>&copy; 2023 Bachelor Thesis by Mulham Husein | University of Rostock</p>
+            </footer>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
